@@ -1,0 +1,535 @@
+
+<meta charset="utf-8"/>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Instructor </title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+        }
+        div {
+            height: 100%;
+            width: 50%;
+            border-left: 4px solid black;
+        }
+        .split {
+            height: 100%;
+            width: 49%;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            overflow-x: hidden;
+            padding-top: 20px;
+            padding-left: 5px;
+        }
+
+        .left {
+            left: 0;
+            background-color: #a8c0ff;
+        }
+
+        .right {
+            right: 0;
+            background-color: #b2aea7;
+        }
+
+    </style>
+</head>
+<body>
+<form id="masterForm">
+    <div class="split left">
+        <h1>Welcome </h1>
+        <h2>Select an Option:</h2>
+        <button id="btn0" type="button">Create Exam</button>
+        <button id="btn1" type="button">Create Question</button>
+        <button id="btn2" type="button">Get Exam</button>
+        <button id="btnLogout" type="button">Logout</button>
+        <fieldset>please pick an option<p id="insert1"></p></fieldset>
+        <fieldset><p id="insert2"></p></fieldset>
+    </div>
+</form>
+<div class="split right">
+    <h2>Question Bank:</h2>
+    Difficulty: <select id="sortDiff" name="sortDiff">
+    <option value="return">none</option>
+    <option value="easy">easy</option>
+    <option value="medium">medium</option>
+    <option value="hard">hard</option>
+</select>
+    Type: <select id="sortType" name="sortType">
+    <option value="return">none</option>
+    <option value="if">if</option>
+    <option value="loop">loop</option>
+    <option value="print">print</option>
+    <option value="while">while</option>
+</select>
+    KeyWord: <input type="text" id="sortKey" name="sortKey">
+    <button id="btnSort" type="button">Sort</button>
+    <p id="insert3"></p>
+</div>
+</body>
+<script type="text/javascript">
+
+
+
+    var btn0 = document.getElementById("btn0");
+    btn0.addEventListener("click", createExam);
+
+    var btn1 = document.getElementById("btn1");
+    btn1.addEventListener("click", createQuestion);
+
+    var btn2 = document.getElementById("btn2");
+    btn2.addEventListener("click", showExams);
+
+    var btnsorting=document.getElementById("btnSort");
+    btnsorting.addEventListener("click",updateQB);
+
+    var btnLogout = document.getElementById("btnLogout");
+    btnLogout.addEventListener("click", logout);
+
+
+
+    var message = "", gexid = "", gqid = [];
+
+    function logout(){
+        window.location.href = "login.html";
+    }
+
+
+
+    //***************Create Exam
+
+    function createExam(){
+        console.log("Create Exam");
+        document.getElementById("insert2").innerHTML = '';
+        document.getElementById("insert1").innerHTML = '\
+        <h3>Create an Exam:</h3>\
+        <label>Enter Exam Name:</label>\
+        <input type="text" name="examName"><br><br>\
+        <label>Select Questions from the Question Bank and Add Points</label>\
+        <p>Total Points: <label id="totalPoints"></label></p>\
+        <button id="btn5" type="button">Submit</button>';
+
+        var btn5 = document.getElementById("btn5");
+        btn5.addEventListener("click", function() {message = "CreateExam"; submit(setResp);});
+    };
+
+    //***************Create Q
+
+    function createQuestion(){
+        console.log("Create Question");
+        document.getElementById("insert2").innerHTML = '';
+        document.getElementById("insert1").innerHTML = '\
+        <h3>Create a Question:</h3>\
+        <label>Function Name:</label>\
+        <input type="text" name="funcName">\
+        <br>\
+        <label>Description:</label>\
+        <br>\
+        <textarea name="description" rows="10" cols="60"></textarea>\
+        <br>\
+        <label>Difficulty:</label>\
+        <select name="difficulty">\
+          <option value="easy">easy</option>\
+          <option value="medium">medium</option>\
+          <option value="hard">hard</option>\
+        </select>\
+        <label>Type:</label>\
+        <select name="type">\
+          <option value="if">if</option>\
+          <option value="loop">loop</option>\
+          <option value="print">print</option>\
+          <option value="while">while</option>\
+          <option value="return">none</option>\
+        </select>\
+        <br>\
+         <label>Parameters:</label>\
+            <input type="text" name="params[]">\
+        </br>\
+        <label>Test Case 1:</label>\
+        <input type="text" name="tcs[]">\
+        <label>Test Case Result 1:</label>\
+        <input type="text" name="tcr[]">\
+        <br>\
+        <label>Test Case 2:</label>\
+        <input type="text" name="tcs[]">\
+        <label>Test Case Result 2:</label>\
+        <input type="text" name="tcr[]">\
+        <br>\
+        <label>Test Case 3:</label>\
+        <input type="text" name="tcs[]">\
+        <label>Test Case Result 3:</label>\
+        <input type="text" name="tcr[]">\
+        <br>\
+        <label>Test Case 4:</label>\
+        <input type="text" name="tcs[]">\
+        <label>Test Case Result 4:</label>\
+        <input type="text" name="tcr[]">\
+        <br>\
+        <label>Test Case 5:</label>\
+        <input type="text" name="tcs[]">\
+        <label>Test Case Result 5:</label>\
+        <input type="text" name="tcr[]">\
+        <br>\
+        <label>Test Case 6:</label>\
+        <input type="text" name="tcs[]">\
+        <label>Test Case Result 6:</label>\
+        <input type="text" name="tcr[]">\
+        <br>\
+        <button id="btn6" type="button">Submit</button>';
+
+        var btn6 = document.getElementById("btn6");
+        btn6.addEventListener("click", function() {message = "CreateQuestion"; submit(updateQB);});
+    };
+
+    function updateQB(jsonObj){
+        console.log("creating question");
+        document.getElementById("insert2").innerHTML = jsonObj.response;
+        getQuestions();
+    }
+
+    //***************Get X
+
+    function showExams(){
+        console.log("Get Exam");
+        message = "GetExam";
+        submit(getExam);
+    }
+
+    function getExam(jsonObj){
+        var i, x = "", y = "", z = "", exid = "", rel = "";
+        for(i=0; i<jsonObj.examID.length; i++){
+            exid = jsonObj.examName[i];
+            examid=jsonObj.examID[i];//added code before beta
+            console.log(examid);
+            console.log(exid);
+            rel = jsonObj.releaseStatus[i];
+            if(rel === "2"){
+                x += '<br>Exam Released: ' + exid;
+            } else if(rel === "0"){
+                z += '<br>Exam Not Taken: ' + exid;
+            } else if(typeof exid!='undefined'){
+                y += '<br><button  type="button" onclick="previewExam(\'' + examid + '\')">View</button> ' + exid;
+            }
+        }
+        document.getElementById("insert2").innerHTML = '';
+        document.getElementById("insert1").innerHTML = '<h3>Get an Exam:</h3>' + y + x + z;
+    }
+
+    function previewExam(examid){
+        console.log(examid);
+        gexid = examid;
+        message = "StudentViewExam";
+        submit(buildExam);
+    }
+
+    function buildExam(jsonObj){
+        console.log("submit");
+        var i, j = 1, w = "", x = "", fn = "",gd1="",funcName="",deduct="", tp = "", desc = "", cd = "", gd = "", ptt = "", comm = "", tgd = "",ansif="",ansprint="",answhile="";
+        gqid = [];
+        for(i=0; i<jsonObj.questionID.length; i++){
+
+            qid = jsonObj.questionID[i];
+            funcName = jsonObj.functionName[i];
+            tp = jsonObj.type[i];
+            desc = jsonObj.description[i];
+            cd = jsonObj.code[i];
+            gd = jsonObj.grade[i];
+            gd1 = jsonObj.grade[i];
+            ptt = jsonObj.points[i];
+            comm = jsonObj.comments[i];
+            lp = jsonObj.loop[i];
+            rt = jsonObj.return[i];
+            fn = jsonObj.funcName[i];
+            ansif = jsonObj.if[i];
+            ansprint = jsonObj.print[i];
+            answhile = jsonObj.while[i];
+            ex = jsonObj.extra[i];
+            gqid.push(qid);
+            w = '<table><tr><th>Test Cases</th></tr>';
+
+            if(lp != "0"&& typeof lp!='undefined'){
+                w += '<tr><td>Does not contain for loop: -<input id=\'lp' + i +
+                    '\' value=\'' + lp +
+                    '\' oninput="calc(' + i + ', ' + gd + ')"></td></tr>';
+            }
+            if(rt != "0"&& typeof rt!='undefined'){
+                w += '<tr><td>Does not use return statement: -<input id=\'rt' + i +
+                    '\' value=\'' + rt +
+                    '\' oninput="calc(' + i + ', ' + gd + ')"></td></tr>';
+            }
+            if(fn != "0"&& typeof fn!='undefined'){
+                w += '<tr><td>Incorrect function name: -<input id=\'fn' + i +
+                    '\' value=\'' + fn +
+                    '\' oninput="calc(' + i + ', ' + gd + ')"></td></tr>';
+            }
+            if(ansif != "0"&& typeof ansif!='undefined'){
+                w += '<tr><td>Does not use if statement: -<input id=\'ansif' + i +
+                    '\' value=\'' + ansif +
+                    '\' oninput="calc(' + i + ', ' + gd + ')"></td></tr>';
+            }
+            if(ansprint != "0"&& typeof ansprint!='undefined'){
+                w += '<tr><td>Does not use print statement: -<input id=\'ansprint' + i +
+                    '\' value=\'' + ansprint +
+                    '\' oninput="calc(' + i + ', ' + gd + ')"></td></tr>';
+            }
+            if(answhile != "0"&& typeof answhile!='undefined'){
+                w += '<tr><td>Does not use while loop: -<input id=\'answhile' + i +
+                    '\' value=\'' + answhile +
+                    '\' oninput="calc(' + i + ', ' + gd + ')"></td></tr>';
+            }
+            if(typeof ex!='undefined'){
+                w += '<tr><td>Does not use colon: -<input id=\'ex' + i +
+                    '\' value=\'' + ex +
+                    '\' oninput="calc(' + i + ', ' + gd + ')"></td></tr>';
+            }
+            w += '<tr><td>Any more deductions: -<input id=\'deduct' + i +
+                '\' value=\'' + deduct +
+                '\' oninput="calc(' + i + ', ' + gd + ')"></td></tr>';
+
+            w += '</table>';
+            x += '<h3>Question ' + j +
+                ':</h3><b>Function Name: </b>' + funcName +
+                '<b>  Topic: </b>' + tp +
+                '<br><br>' + desc +
+                '<h4>Answer:</h4>' + cd +
+                '<h4>Auto Grader Results:</h4>' +
+                (w == "<table><tr><th>Test Case</th></tr></table>" ? "No deductions" : w) +
+                '<br><br> Autograder Grade: '+gd1+' / ' + ptt +
+                '<br><br> Updated Grade: <input type="text" name="gd[]"> / ' + ptt +
+                '<h4>Add Comments:</h4>' +
+                '<textarea name="comm[]" rows="5" cols="30" value=' + comm + '></textarea>';
+            j++;
+        }
+        document.getElementById("insert2").innerHTML = '<h2>' + gexid +
+            ' Exam:<h2>' + x +
+            '<br><br><button id="btn8" type="button">Release Exam</button>';
+
+        for(i=0; i<jsonObj.length; i++){
+            calc(i, ptt);
+        }
+        var btn8 = document.getElementById("btn8");
+        btn8.addEventListener("click", releaseExam);
+    }
+
+    function calc(i, ptt){
+        var total = ptt;
+        if(document.getElementById('lp' + i)){total -= document.getElementById('lp' + i).value;}
+        if(document.getElementById('rt' + i)){total -= document.getElementById('rt' + i).value;}
+        if(document.getElementById('fn' + i)){total -= document.getElementById('fn' + i).value;}
+        if(document.getElementById('ansif' + i)){total -= document.getElementById('ansif' + i).value;}
+        if(document.getElementById('ansprint' + i)){total -= document.getElementById('ansprint' + i).value;}
+        if(document.getElementById('answhile' + i)){total -= document.getElementById('answhile' + i).value;}
+        if(document.getElementById('ex' + i)){total -= document.getElementById('ex' + i).value;}
+        if(document.getElementById('deduct' + i)){total -= document.getElementById('deduct' + i).value;}
+
+        document.getElementsByName('gd[]')[i].value = total;
+    }
+
+    function releaseExam(){
+        console.log("Release Exam");
+        message = "ReleaseExam";
+        submit(setResp);
+    };
+
+
+    //***************QB
+
+    function getQuestions(){
+        message = "GetQuestions";
+        submit(buildQB);
+    };
+
+    function buildQB(jsonObj){
+        var sortType = document.getElementById("sortType").value;
+        console.log(sortType);
+        var sortDiff = document.getElementById("sortDiff").value;
+        console.log(sortDiff);
+        var sortKey = document.getElementById("sortKey").value;
+        console.log(sortKey);
+        var i, x = "", qid = "",param="", desc = "", qtype = "", fname = "", tc = "", tcr = "";
+
+
+        console.log(jsonObj.questionID.length);
+        for(i=0; i< jsonObj.questionID.length; i++){
+            console.log(i);
+            qid = jsonObj.questionID[i];
+            console.log(qid);
+            fname = jsonObj.funcName[i];
+            console.log(fname);
+            desc = jsonObj.description[i];
+            console.log(desc);
+            qtype = jsonObj.type[i];
+            console.log(qtype);
+            diff = jsonObj.difficulty[i];
+            console.log(diff);
+            tc = jsonObj.testCases[i];
+            console.log(tc);
+            tcr = jsonObj.testCaseResult[i];
+            console.log(tcr);
+            param = jsonObj.parameters[i];
+
+            if((sortDiff == diff || sortDiff == "return") && (qtype.includes(sortType) || sortType == "return") && (desc.includes(sortKey) || sortKey == ""))
+            { x += '<fieldset id="q' + i + '">' +
+                '<button type="button" onclick="addQuestion(q' + i + ')">Add</button><b>Function Name: </b>' + fname +
+                '<br><b> Difficulty: </b>' + diff +
+                '<br><b>Parameters: </b>'  + '<br>' + param + '<br><br>'+
+                '<b> Type: </b>' + qtype + '<br><b> Test Cases: </b>' + tc + '<b>  Test Case Result: </b>' + tcr +
+                '<input type="text" name="qid[]" value=' + qid + ' hidden><br>' +
+                '<b>Points: </b><input type="number" name="pts[]" oninput="totalPoints()"><br>' +
+                '<b>Description: </b>'  + '<br>' + desc + '<br><br></fieldset>';
+            }
+        }
+        document.getElementById("insert3").innerHTML = x;
+    }
+
+    function addQuestion(field){
+        field.removeChild(field.childNodes[0]);
+        document.getElementById("insert1").appendChild(field);
+    }
+
+    function totalPoints(){
+        var i, x = 0;
+        var pt = document.getElementsByName('pts[]');
+        for(i=0; i<pt.length;i++){
+            x += Number(pt[i].value);
+        }
+        document.getElementById("totalPoints").innerHTML = x;
+
+    }
+
+    //***************General Response Callback
+
+    function setResp(jsonObj){
+        if(jsonObj.response){
+            document.getElementById("insert2").innerHTML = jsonObj.response;
+        }
+        else{
+            document.getElementById("insert2").innerHTML = jsonObj;
+        }
+    }
+
+    //***************AJAX and FormData
+
+    function submit(cFunction){
+        var formElement = new FormData(document.querySelector("form"));
+
+        console.log(message);
+        formElement.append("message", message);
+
+
+        if(message == "CreateExam"){
+            var questionID = [], points = [];
+            var qid = document.getElementById("masterForm").elements.namedItem("qid[]"); //first group
+            var pts = document.getElementById("masterForm").elements.namedItem("pts[]"); //first group
+
+            //var qid = document.getElementsByName("masterForm").elements.namedItem("qid[]");second group not creating exam
+            //var pts = document.getElementsByName("masterForm").elements.namedItem("pts[]");
+
+
+
+            console.log(qid);
+
+            for(var i=0; i<qid.length; i++){
+                questionID.push(qid[i].value);
+                points.push(pts[i].value);
+            }
+            console.log(points);
+            formElement.append("questionID", questionID); // was formElement formData doesn't work
+            formElement.append("points", points);// was formElement
+            console.log(qid);
+        }
+
+        if(message == "CreateQuestion"){
+            var tc = document.getElementsByName("tcs[]");
+            var params = document.getElementsByName("params[]");
+            var tcr = document.getElementsByName("tcr[]");
+
+            var testCases = [];
+            var testCaseResult = [];
+            var parameters=[];
+            for(var i=0; i<tc.length; i++){
+                if(tc[i].value){
+                    testCases.push(tc[i].value + "");
+                }
+            }
+            console.log(testCases);
+
+            for (var i=0; i<tcr.length; i++){
+                if(tcr[i].value){
+                    testCaseResult.push(tcr[i].value + "");
+                }
+            }
+            for (var i=0; i<params.length; i++){
+                if(params[i].value){
+                    parameters.push(params[i].value + "");
+                }
+            }
+            formElement.append("testCases", testCases);
+            formElement.append("testCaseResult", testCaseResult);
+            formElement.append("parameters", parameters);
+        }
+
+        if(message == "StudentViewExam"){
+            console.log(gexid);
+            formElement.append("examId", gexid);
+        }
+
+        if(message == "ReleaseExam"){
+            var gd = document.getElementsByName("gd[]");
+            var comm = document.getElementsByName("comm[]");
+
+            var grade = [], comments = [],ansif=[],answhile=[],ansprint=[], lp = [], rt = [], fn = [], ex = [];
+            for(var i=0; i<gd.length; i++){
+                if(document.getElementById('lp' + i)){lp.push(document.getElementById('lp' + i).value);} else{lp.push(0);}
+                if(document.getElementById('rt' + i)){rt.push(document.getElementById('rt' + i).value);} else{rt.push(0);}
+                if(document.getElementById('fn' + i)){fn.push(document.getElementById('fn' + i).value);} else{fn.push(0);}
+                if(document.getElementById('ex' + i)){ex.push(document.getElementById('ex' + i).value);} else{ex.push(0);}
+                if(document.getElementById('ansif' + i)){ex.push(document.getElementById('ansif' + i).value);} else{ansif.push(0);}
+                if(document.getElementById('answhile' + i)){ex.push(document.getElementById('answhile' + i).value);} else{answhile.push(0);}
+                if(document.getElementById('ansprint' + i)){ex.push(document.getElementById('ansprint' + i).value);} else{ansprint.push(0);}
+                grade.push(gd[i].value);
+                comments.push(comm[i].value);
+            }
+            formElement.append("if", ansif);
+            formElement.append("while", answhile);
+            formElement.append("print", ansprint);
+            formElement.append("loop", lp);
+            formElement.append("return", rt);
+            formElement.append("fn", fn);
+            formElement.append("ex", ex);
+            formElement.append("questionID", gqid);
+            formElement.append("examId", gexid);
+            formElement.append("grade", grade);
+            formElement.append("comments", comments);
+        }
+
+        for(var pair of formElement.entries()){
+            console.log(pair[0]+ ', '+ pair[1]);
+        }
+
+
+
+        var xmlhttp = new XMLHttpRequest();
+
+        xmlhttp.onreadystatechange = function() {
+            if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                console.log(xmlhttp.response);
+                //alert(xmlhttp.response);
+                jsonObj = JSON.parse(xmlhttp.responseText);
+                //alert(jsonObj);
+                console.log(jsonObj);
+                cFunction(jsonObj);
+            }
+        };
+
+        xmlhttp.open("POST", "https://web.njit.edu/~aoa52/cs490/newlogin.php", true);
+        xmlhttp.send(formElement);
+
+    }
+
+    getQuestions();
+</script>
+</html>
