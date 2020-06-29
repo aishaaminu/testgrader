@@ -1,0 +1,61 @@
+
+
+<meta charset="utf-8"/>
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Portal Login</title>
+</head>
+<body>
+<h1>Enter Username and Password</h1>
+<form id="form1">    <!--login form-->
+    <label>Username</label>
+    <input type="text" name="ucid">
+    <label>Password</label>
+    <input type="password" name="pass">
+    <button id="btn1" type="button">Login</button>
+    <p id="insert1"></p>
+</form>
+</body>
+<script>
+
+
+    var btn1 = document.getElementById("btn1");  //establish button 1 listener
+    btn1.addEventListener("click", func);
+
+    function func(){                             //AJAX request with POST
+        console.log("test: button 1 pressed");
+        document.getElementById("insert1").innerHTML = "";
+        var form=document.getElementById("form1");
+        var formElement = new FormData(form);
+
+        //formElement.append()
+        //grab form elements: ucid and password
+        formElement.append("message", "Login");
+        //alert(formElement.value);
+
+        var xmlhttp = new XMLHttpRequest();
+
+        xmlhttp.onreadystatechange = function() {            //establish response "listener" to the POST request
+            if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                console.log(this.responseText);               //modify HTML to reflect response
+                var response = JSON.parse(this.responseText);
+                console.log(response);
+
+                if(response == null || response.length == 0){
+                    document.getElementById("insert1").innerHTML = "Incorrect Username and/or password";
+                } console.log(response);
+                 if(response == "s") {
+                    window.location.href = "./studenttest.html";
+                } else if(response == "i"){
+                    window.location.href = "./instructortest.html";
+                }
+            }
+        };
+
+        xmlhttp.open("POST", "https://web.njit.edu/~aoa52/cs490/newlogin.php", true);
+        xmlhttp.send(formElement);    //send form data object via POST
+    };
+</script>
+</html>
